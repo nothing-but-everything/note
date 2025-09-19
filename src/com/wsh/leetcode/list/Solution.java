@@ -1,7 +1,32 @@
 package com.wsh.leetcode.list;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode() {
+    }
+
+    TreeNode(int val) {
+        this.val = val;
+    }
+
+    TreeNode(int val, TreeNode left, TreeNode right) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class Node {
+    public int val;
+    public Node prev;
+    public Node next;
+    public Node child;
+}
 
 /*class Node {
     int val;
@@ -15,7 +40,7 @@ import java.util.Set;
     }
 }*/
 
-class Node {
+/*class Node {
     public int val;
     public Node left;
     public Node right;
@@ -34,7 +59,7 @@ class Node {
         right = _right;
         next = _next;
     }
-}
+}*/
 
 class ListNode {
     int val;
@@ -55,12 +80,263 @@ class ListNode {
 
 public class Solution {
 
-    public Node connect(Node root) {
-        if (root == null) {
+    public int[] nodesBetweenCriticalPoints(ListNode head) {
+        if (head == null || head.next == null || head.next.next == null) {
+            return new int[]{-1, -1};
+        }
+        ListNode prev = head, current = head.next, post = current.next;
+        List<Integer> list = new ArrayList<>();
+        int i = 0;
+        while (post != null) {
+            if (current.val > prev.val && current.val > post.val
+                    || current.val < prev.val && current.val < post.val) {
+                list.add(i);
+            }
+            i++;
+            prev = prev.next;
+            current = current.next;
+            post = post.next;
+        }
+        if (list.size() < 2) {
+            return new int[]{-1, -1};
+        }
+        int max = list.get(list.size() - 1) - list.get(0);
+        int min = Integer.MAX_VALUE;
+        for (int s = 1; s < list.size(); s++) {
+            min = Math.min(min, list.get(s) - list.get(s - 1));
+        }
+        return new int[]{min, max};
+    }
+
+    public int pairSum(ListNode head) {
+        ListNode slow = head, fast = head, prev = null;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        prev.next = null;
+        slow = reverseList(slow);
+        fast = head;
+        int max = 0;
+        while (fast != null) {
+            max = Math.max(max, slow.val + fast.val);
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return max;
+    }
+
+    public ListNode mergeInBetween(ListNode list1, int a, int b, ListNode list2) {
+        ListNode node = new ListNode(), left = node, right = node, prev = null, post = null;
+        node.next = list1;
+        while (a-- >= 0) {
+            prev = left;
+            left = left.next;
+        }
+        while (b-- >= 0) {
+            right = right.next;
+        }
+        post = right.next;
+
+        ListNode tail = list2;
+        while (tail.next != null) {
+            tail = tail.next;
+        }
+        prev.next = list2;
+        tail.next = post;
+        return list1;
+    }
+
+    public ListNode swapNodes(ListNode head, int k) {
+        ListNode node = new ListNode(), left = node, right = node, prev = node;
+        node.next = head;
+        for (int i = 0; i < k; i++) {
+            right = right.next;
+        }
+        while (right != null) {
+            left = left.next;
+            right = right.next;
+        }
+        while (k-- > 0) {
+            prev = prev.next;
+        }
+        int temp = left.val;
+        left.val = prev.val;
+        prev.val = temp;
+        return node.next;
+    }
+
+    public ListNode mergeNodes(ListNode head) {
+        ListNode node = new ListNode(), prev = node, current = head;
+        int sum = 0;
+        while (current != null) {
+            if (current.val == 0) {
+                if (sum != 0) {
+                    prev.next = new ListNode(sum);
+                    prev = prev.next;
+                    sum = 0;
+                }
+            } else {
+                sum += current.val;
+            }
+            current = current.next;
+        }
+        return node.next;
+    }
+
+    public ListNode deleteMiddle(ListNode head) {
+        if (head == null || head.next == null) {
             return null;
         }
-        return null;
+        ListNode prev = null, slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        prev.next = slow.next;
+        return head;
     }
+
+    public ListNode[] listOfDepth(TreeNode tree) {
+        if (tree == null) {
+            return new ListNode[]{};
+        }
+        int curLine = 1, nextLine = 0;
+        TreeNode current = tree;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(current);
+        List<ListNode> list = new ArrayList<>();
+        ListNode node = new ListNode(), prev = node;
+        while (!queue.isEmpty()) {
+            current = queue.poll();
+            curLine--;
+            prev.next = new ListNode(current.val);
+            prev = prev.next;
+
+            if (current.left != null) {
+                queue.offer(current.left);
+                nextLine++;
+            }
+            if (current.right != null) {
+                queue.offer(current.right);
+                nextLine++;
+            }
+
+            if (curLine == 0) {
+                curLine = nextLine;
+                nextLine = 0;
+                list.add(node.next);
+                prev = node;
+            }
+        }
+        ListNode[] result = new ListNode[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            result[i] = list.get(i);
+        }
+        return result;
+    }
+
+    public TreeNode sortedListToBST(ListNode head) {
+        if (head == null) {
+            return null;
+        }
+        if (head.next == null) {
+            return new TreeNode(head.val);
+        }
+        ListNode prev = null, slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        prev.next = null;
+        TreeNode node = new TreeNode(slow.val);
+        node.left = sortedListToBST(head);
+        node.right = sortedListToBST(slow.next);
+        return node;
+    }
+
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        ListNode node = new ListNode(), prev = null, current = node, post = node;
+        node.next = head;
+        while (right-- >= 0) {
+            post = post.next;
+        }
+        while (left-- > 0) {
+            prev = current;
+            current = current.next;
+        }
+        ListNode temp = current;
+        current = reverseList(current, post);
+        prev.next = current;
+        temp.next = post;
+        return node.next;
+    }
+
+
+    public ListNode reverseList(ListNode head, ListNode after) {
+        ListNode prev = null, current = head, post;
+        while (current != after) {
+            post = current.next;
+            current.next = prev;
+            prev = current;
+            current = post;
+        }
+        return prev;
+    }
+
+    public ListNode partition(ListNode head, int x) {
+        ListNode lessThan = new ListNode(), l1 = lessThan;
+        ListNode moreThan = new ListNode(), l2 = moreThan;
+        ListNode current = head;
+        while (current != null) {
+            if (current.val < x) {
+                l1.next = current;
+                l1 = l1.next;
+            } else {
+                l2.next = current;
+                l2 = l2.next;
+            }
+            current = current.next;
+        }
+        l2.next = null;
+        l1.next = moreThan.next;
+        return lessThan.next;
+    }
+
+    /*public Node connect(Node root) {
+        if (root == null) {
+            return root;
+        }
+        int currentLine = 1, nextLine = 0;
+        Node current = root, post = null;
+        Queue<Node> queue = new LinkedList<>();
+        queue.offer(current);
+        while (!queue.isEmpty()) {
+            current = queue.poll();
+            current.next = post;
+            post = current;
+            currentLine--;
+
+            if (current.right != null) {
+                queue.offer(current.right);
+                nextLine++;
+            }
+            if (current.left != null) {
+                queue.offer(current.left);
+                nextLine++;
+            }
+
+            if (currentLine == 0) {
+                currentLine = nextLine;
+                nextLine = 0;
+                post = null;
+            }
+        }
+        return root;
+    }*/
 
     /*public Node copyRandomList(Node head) {
         Map<Node, Node> map = new HashMap<>();
