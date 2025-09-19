@@ -80,6 +80,124 @@ class ListNode {
 
 public class Solution {
 
+    public ListNode reverseList(ListNode head) {
+        ListNode prev = null, current = head, post;
+        while (current != null) {
+            post = current.next;
+            current.next = prev;
+            prev = current;
+            current = post;
+        }
+        return prev;
+    }
+
+    public ListNode insertionSortList(ListNode head) {
+        ListNode node = new ListNode(Integer.MIN_VALUE), prev = node, current = head, post, after;
+        while (current != null) {
+            post = current.next;
+            current.next = null;
+
+            prev = node;
+            while (true) {
+                if (prev.next == null) {
+                    prev.next = current;
+                    break;
+                }
+                if (current.val >= prev.val && prev.next.val >= current.val) {
+                    current.next = prev.next;
+                    prev.next = current;
+                    break;
+                }
+                prev = prev.next;
+            }
+
+            current = post;
+        }
+        return node.next;
+    }
+
+    public Node flatten(Node head) {
+        if (head == null) {
+            return null;
+        }
+        Node current = head, post, child, tail;
+        while (current != null) {
+            if (current.child != null) {
+                post = current.next;
+                child = current.child;
+                tail = child;
+                current.next = flatten(current.child);
+                while (tail.next != null) {
+                    tail = tail.next;
+                }
+
+                current.child = null;
+                current.next.prev = current;
+                tail.next = post;
+                if (post != null) {
+                    post.prev = tail;
+                }
+            }
+            current = current.next;
+        }
+        return head;
+    }
+
+    public ListNode modifiedList(int[] nums, ListNode head) {
+        Set<Integer> set = new HashSet<>((int) (nums.length / 0.75 + 1));
+        for (int num : nums) {
+            set.add(num);
+        }
+        ListNode node = new ListNode(), prev = node, current = head;
+        while (current != null) {
+            if (!set.contains(current.val)) {
+                prev.next = current;
+                prev = prev.next;
+            }
+            current = current.next;
+        }
+        prev.next = null;
+        return node.next;
+    }
+
+    public ListNode doubleIt(ListNode head) {
+        if (head == null) {
+            return null;
+        }
+        ListNode node = new ListNode(), prev = node, current = reverseList(head);
+        node.next = current;
+        int sum = 0;
+        while (current != null) {
+            sum += current.val * 2;
+            current.val = sum % 10;
+            sum /= 10;
+            prev.next = current;
+            prev = prev.next;
+            current = current.next;
+        }
+        if (sum != 0) {
+            prev.next = new ListNode(sum);
+            prev = prev.next;
+        }
+        return reverseList(node.next);
+    }
+
+    public ListNode removeNodes(ListNode head) {
+        ListNode current = reverseList(head);
+        ListNode node = new ListNode(), prev = node;
+        int val = current.val - 1;
+        while (current != null) {
+            if (current.val >= val) {
+                prev.next = current;
+                prev = prev.next;
+                val = current.val;
+            }
+            current = current.next;
+        }
+        prev.next = null;
+        return reverseList(node.next);
+    }
+
     public int[] nodesBetweenCriticalPoints(ListNode head) {
         if (head == null || head.next == null || head.next.next == null) {
             return new int[]{-1, -1};
@@ -88,8 +206,7 @@ public class Solution {
         List<Integer> list = new ArrayList<>();
         int i = 0;
         while (post != null) {
-            if (current.val > prev.val && current.val > post.val
-                    || current.val < prev.val && current.val < post.val) {
+            if (current.val > prev.val && current.val > post.val || current.val < prev.val && current.val < post.val) {
                 list.add(i);
             }
             i++;
@@ -651,17 +768,6 @@ public class Solution {
             fast = fast.next;
         }
         return true;
-    }
-
-    public ListNode reverseList(ListNode head) {
-        ListNode prev = null, current = head, post;
-        while (current != null) {
-            post = current.next;
-            current.next = prev;
-            prev = current;
-            current = post;
-        }
-        return prev;
     }
 
     public ListNode removeElements(ListNode head, int val) {
