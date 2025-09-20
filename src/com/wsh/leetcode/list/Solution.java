@@ -80,9 +80,95 @@ class ListNode {
 
 public class Solution {
 
+    public ListNode sortList(ListNode head) {
+
+    }
+
+    public ListNode insertGreatestCommonDivisors(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode current = head, post = head.next;
+        while (post != null) {
+            int val = gcd(current.val, post.val);
+            ListNode node = new ListNode(val);
+            node.next = post;
+            current.next = node;
+            current = post;
+            post = post.next;
+        }
+        return head;
+    }
+
+    public int gcd(int a, int b) {
+        if (b == 0) {
+            return a;
+        }
+        return gcd(b, a % b);
+    }
+
+    public int numComponents(ListNode head, int[] nums) {
+        Set<Integer> set = new HashSet<>((int) (nums.length / 0.75 + 1));
+        for (Integer num : nums) {
+            set.add(num);
+        }
+        ListNode current = head;
+        int sum = 0;
+        boolean flag = false;
+        while (current != null) {
+            if (set.contains(current.val)) {
+                flag = true;
+            } else {
+                if (flag) {
+                    sum++;
+                    flag = false;
+                }
+            }
+            current = current.next;
+        }
+        if (flag) {
+            sum++;
+        }
+        return sum;
+    }
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode node = new ListNode(), prev = node, left = head, right = node, tail;
+        node.next = head;
+        while (left != null) {
+            for (int i = 0; i < k && right != null; i++) {
+                right = right.next;
+            }
+            if (right == null) {
+                break;
+            }
+            tail = right.next;
+            left = reverseList(left, tail);
+
+            left.next = tail;
+            prev.next = right;
+
+            left = tail;
+            prev = left;
+            right = left;
+        }
+        return node.next;
+    }
+
     public ListNode reverseList(ListNode head) {
         ListNode prev = null, current = head, post;
         while (current != null) {
+            post = current.next;
+            current.next = prev;
+            prev = current;
+            current = post;
+        }
+        return prev;
+    }
+
+    public ListNode reverseList(ListNode head, ListNode after) {
+        ListNode prev = null, current = head, post;
+        while (current != after) {
             post = current.next;
             current.next = prev;
             prev = current;
@@ -390,18 +476,6 @@ public class Solution {
         prev.next = current;
         temp.next = post;
         return node.next;
-    }
-
-
-    public ListNode reverseList(ListNode head, ListNode after) {
-        ListNode prev = null, current = head, post;
-        while (current != after) {
-            post = current.next;
-            current.next = prev;
-            prev = current;
-            current = post;
-        }
-        return prev;
     }
 
     public ListNode partition(ListNode head, int x) {
