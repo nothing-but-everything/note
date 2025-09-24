@@ -81,7 +81,7 @@ class ListNode {
 public class Solution {
 
     public ListNode sortList(ListNode head) {
-
+        return null;
     }
 
     public ListNode insertGreatestCommonDivisors(ListNode head) {
